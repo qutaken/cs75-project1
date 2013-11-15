@@ -19,12 +19,19 @@ if (isset($_POST["email"]) && isset($_POST["password"]))
 	 * hash the password
 	 * start a transaction 
 	 */
-	validate_email($email);
+	//validate_email($email);
 	$password = hash("SHA1", $password);
-	$dbh = connect_to_database();
+	$registered = register_user($email, $password, $error);
+	if (!$registered)
+	{
+		render('register', array('error' => $error));
+	}
+	else
+	{
+		render('login');	
+	}
 }
 else
 {
 	render('register');
 }
-echo "Hello World we are under construction.";

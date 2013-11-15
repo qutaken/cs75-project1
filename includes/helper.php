@@ -9,7 +9,7 @@
  * Contains a few helpful functions.
  * This should be required by all controllers.
  ****************************************************/
-	require_once("constants.php");
+require_once("constants.php");
 /*
  * render() - Renders the template
  *
@@ -35,12 +35,10 @@ function connect_to_database()
 		$dbh = new PDO('mysql:host=' . DB_HOST . ';dbname=' . DB_DATABASE, DB_USER, DB_PASSWORD);
 		$dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 	} 
-	catch(PDOexception $e) 
+	catch(PDOexception $e)
 	{
-		echo "Error: connecction could not be made with database we are very sorry for the inconvenience 
-		and our team are working to fix this error.\n";
-		return false;
-	}
+		return false;		
+	} 
 	return $dbh;
 }
 /*
@@ -50,19 +48,19 @@ function connect_to_database()
  * @param PDO object $dbh - Database handler.
  * @param string $query_string - The query that you want to query.
  * @param array $array_values - An array with key=>value pairs where key is the placeholder
- *  and value is the value that gets plugged in to the string using bindValues().
+ *  and value is the value that gets plugged in to the string using bindValue().
  */
 function prepare_query($dbh, $query_string, $array_values)
 {
 	// prepare the string for database query.
 	$sth = $dbh->prepare($query_string);
-	if ($sth === false)
-	{
-		echo "Not a valid SQL query";
+	if (!$sth)
 		return false;
-	}
 	foreach ($array_values as $key => $value) {
-		$sth->bindValue(':' . $key, $value);
+		if (strpos($query_string,':' . $key))
+		{
+			$sth->bindValue(':' . $key, $value);			
+		}
 	}
 	return $sth;
 }
@@ -74,14 +72,16 @@ function prepare_query($dbh, $query_string, $array_values)
 if (isset($_GET["page"]))
 {
 	$page = $_GET["page"];
-	if ($page !== "login" | "register" | "logout")
+	$everyone = array('login', 'register', 'logout');
+	if (!in_array($page, $everyone))
 	{
-		if (!isset($_SESSION["userid"]))
+		if (empty($_SESSION["userid"]))
 		{
 			header("Location: http://project1/");
 			exit;
 		}
-	}	
+	}
+	
 }
 
 

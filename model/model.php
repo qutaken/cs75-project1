@@ -18,11 +18,16 @@
 function login_user($email, $password)
 {
 	$dbh = connect_to_database();
+	if (!$dbh)
+		return ($dbh = null);
 	$values = array("email" => "$email", "password" => hash("SHA1",$password));
 	$sth = prepare_query($dbh, "SELECT uid FROM users WHERE LOWER(email)=:email AND password=:password",$values);
+	if(!$sth)
+		return ($dbh = null);
 	$sth->execute();
 	$result = $sth->fetch(PDO::FETCH_ASSOC);
 	if (isset($result["uid"])) {
+		$dbh = null;
 		return $result["uid"];
 	}
 }
@@ -86,8 +91,41 @@ function get_quote_data($symbol)
  */
 function register_user($email, $password, &$error)
 {
-    $error = 'Your account could not be registered. Did you forget your password?';
-    return false;
+	$dbh = connect_to_database();
+	if (!$dbh) 
+	{
+		$error = 'could not connect to database';
+		$dbh = null;
+		return false;
+	}
+	$values = array('email' => $email, 'password' => hash('SHA1', $password));
+	$select_stmt = prepare_query($dbh, "SELECT * FROM users WHERE email=:email", $values);
+	if (!$select_stmt) 
+	{
+		$error = 'Not valid SQL statement #SELECT';
+		return false;
+	}
+	$insert_stmt = prepare_query($dbh, "INSERT INTO users (email, password, money) VALUES (:email, :password, 10000)", $values);
+	if (!$select_stmt) 
+	{
+		$error = 'Not valid SQL statement #INSERT';
+		return false;
+	}
+	$dbh->beginTransaction();
+	$select_stmt->execute();
+	if ($select_stmt->rowCount() < 1) 
+	{
+		$insert_stmt->execute();
+		$dbh->commit();
+		$dbh = null;
+		return true;
+	}
+	else
+	{
+		$dbh->rollback();
+	    $error = 'Your seem to have already been registered.';
+	    return false;
+	}
 }
 
 function get_user_balance($userid) { }
