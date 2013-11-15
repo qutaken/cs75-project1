@@ -20,7 +20,7 @@ if (isset($_POST['email']) &&
 	$password = $_POST['password'];
 	$pwdhash = hash("SHA1", $password);
 	
-	$userid = login_user($email, $password);
+	$userid = login_user($email, $password, $error);
 	if ($userid > 0)
 	{
 		$_SESSION['userid'] = $userid;
@@ -28,7 +28,7 @@ if (isset($_POST['email']) &&
 	}
 	else
 	{
-		render('pwdhash',array('pwdhash' => $pwdhash));
+		render('pwdhash',array('pwdhash' => $pwdhash, 'error' => $error));
 	}
 }
 else

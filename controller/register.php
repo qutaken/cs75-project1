@@ -11,24 +11,31 @@
 require_once('../model/model.php');
 require_once('../includes/helper.php');
 
-if (isset($_POST["email"]) && isset($_POST["password"]))
+if (isset($_POST["email"]) && isset($_POST["password"]) && isset($_POST["re_password"]))
 {
-	$email = $_POST["email"]; $password = $_POST["password"];
-	/*
-	 * validate the email
-	 * hash the password
-	 * start a transaction 
-	 */
-	//validate_email($email);
-	$password = hash("SHA1", $password);
-	$registered = register_user($email, $password, $error);
-	if (!$registered)
+	if (strcmp($_POST['password'], $_POST['re_password']))
 	{
-		render('register', array('error' => $error));
+		render('register', array('error' => "Passwords don't match."));
 	}
 	else
 	{
-		render('login');	
+		$email = $_POST["email"]; $password = $_POST["password"];
+		/*
+		 * validate the email
+		 * hash the password
+		 * start a transaction 
+		 */
+		//validate_email($email);
+		$password = hash("SHA1", $password);
+		$registered = register_user($email, $password, $error);
+		if (!$registered)
+		{
+			render('register', array('error' => $error));
+		}
+		else
+		{
+			render('login');	
+		}
 	}
 }
 else

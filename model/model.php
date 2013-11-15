@@ -15,17 +15,26 @@
  * @param string $email
  * @param string $password
  */
-function login_user($email, $password)
+function login_user($email, $password, &$error)
 {
 	$dbh = connect_to_database();
 	if (!$dbh)
-		return ($dbh = null);
-	$values = array("email" => "$email", "password" => hash("SHA1",$password));
+	{
+		$error = "Could not connect to Database.";
+		return false;
+	}
+	$values = array("email" => $email, "password" => hash("SHA1",$password));
 	$sth = prepare_query($dbh, "SELECT uid FROM users WHERE LOWER(email)=:email AND password=:password",$values);
 	if(!$sth)
-		return ($dbh = null);
+	{
+		$dbh = null;
+		$error = "Incorrect SQL statement.";
+		return false;
+	}
 	$sth->execute();
+	echo "executed";
 	$result = $sth->fetch(PDO::FETCH_ASSOC);
+	print_r($result);
 	if (isset($result["uid"])) {
 		$dbh = null;
 		return $result["uid"];
