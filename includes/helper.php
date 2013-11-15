@@ -6,7 +6,7 @@
  * Project 1
  * Chris Gerber
  *
- * Renders a view template with specified parameters
+ * Contains a few helpful functions.
  * This should be required by all controllers.
  ****************************************************/
 	require_once("constants.php");
@@ -25,17 +25,11 @@ function render($template, $data = array())
         require($path);
     }
 }
-
-/*
- * query() - Queries the Database - returns: on success - a statement_handle ready to be executed.
- *                 							 on failure - false.
- *
- * @param string $query_string - The query that you want to query
- * @param array $array_values - An array with key=>value pairs where key is the placeholder
- *  and value is the value that gets plugged in to the string using bindValues()
+/* connect_to_database() - returns a Database handler, on error returns false.
  */
-function prepare_query($query_string, $array_values)
+function connect_to_database()
 {
+	// attempt connection to Database
 	try 
 	{
 		$dbh = new PDO('mysql:host=' . DB_HOST . ';dbname=' . DB_DATABASE, DB_USER, DB_PASSWORD);
@@ -47,6 +41,19 @@ function prepare_query($query_string, $array_values)
 		and our team are working to fix this error.\n";
 		return false;
 	}
+	return $dbh;
+}
+/*
+ * query() - Prepares a SQL statement and returns a handle to it
+ * 		   - returns: on success - a statement_handle ready to be executed, on failure - false.
+ *
+ * @param PDO object $dbh - Database handler.
+ * @param string $query_string - The query that you want to query.
+ * @param array $array_values - An array with key=>value pairs where key is the placeholder
+ *  and value is the value that gets plugged in to the string using bindValues().
+ */
+function prepare_query($dbh, $query_string, $array_values)
+{
 	// prepare the string for database query.
 	$sth = $dbh->prepare($query_string);
 	if ($sth === false)
@@ -55,7 +62,7 @@ function prepare_query($query_string, $array_values)
 		return false;
 	}
 	foreach ($array_values as $key => $value) {
-		$sth->bindValues(':' . $key, $value);
+		$sth->bindValue(':' . $key, $value);
 	}
 	return $sth;
 }

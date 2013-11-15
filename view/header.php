@@ -3,6 +3,7 @@
     <head>
         <title><?= htmlspecialchars($title) ?></title>
 		<script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js'></script>
+		<link type="text/css" href="css/styles.css" rel="stylesheet"/>
     </head>
     <body>
 		<a href="/">Home page</a> <br />

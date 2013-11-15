@@ -8,13 +8,7 @@
  *
  * Model for users and portfolios
  *********************************/
-
-// database credentials
-define('DB_HOST', 'localhost');
-define('DB_USER', 'jharvard');
-define('DB_PASSWORD', 'crimson');
-define('DB_DATABASE', 'jharvard_project');
-
+	require_once("../includes/constants.php");
 /*
  * login_user() - Verify account credentials and create session
  *
@@ -23,37 +17,13 @@ define('DB_DATABASE', 'jharvard_project');
  */
 function login_user($email, $password)
 {
-
-	// prepare password hash for safe query
-	$pwdhash = hash("SHA1",$password);
-
-	echo $_SERVER["PHP_SELF"];
-
-	// connect to Database
-	try {
-		$dsn = 'mysql:host='.DB_HOST.';dbname='.DB_DATABASE;
-		$dbh = new PDO($dsn, DB_USER, DB_PASSWORD);
-
-		// prepare the string for database query.
-		$text = sprintf("SELECT uid FROM users 
-						WHERE LOWER(email)='%s' 
-						AND password = '%s'",
-						strtolower($email),$pwdhash);
-		$query = $dbh->prepare($text);
-
-		/* 
-			Not using a transaction because the query is only a select statement and no 
-			other statements are dependent on the select statements return.
-		*/
-		$query->execute();
-		$result = $query->fetch(PDO::FETCH_ASSOC);
-		if (isset($result["uid"])) {
-			return $result["uid"];
-		}
-
-	} catch(PDOexception $e) {
-		echo "Error: connecction could not be made with database we are very sorry for the inconvenience 
-		and our team are working to fix this error.\n";
+	$dbh = connect_to_database();
+	$values = array("email" => "$email", "password" => hash("SHA1",$password));
+	$sth = prepare_query($dbh, "SELECT uid FROM users WHERE LOWER(email)=:email AND password=:password",$values);
+	$sth->execute();
+	$result = $sth->fetch(PDO::FETCH_ASSOC);
+	if (isset($result["uid"])) {
+		return $result["uid"];
 	}
 }
 
