@@ -13,12 +13,10 @@ require_once('../includes/helper.php');
 
 if (isset($_POST["email"]) && isset($_POST["password"]) && isset($_POST["re_password"]))
 {
-	if (strcmp($_POST['password'], $_POST['re_password']))
-		render('register', array('error' => "Passwords don't match."));
-	else if (valid_password($_POST["password"]))
-		render('register', array('error' => "Not a valid password."));	
-	else if (valid_email($_POST["email"]))
-		render('register', array('error' => "Not a valid email."));
+	if (!validate_form($_POST['email'], $_POST['password'], $_POST['re_password'], $error))
+	{
+		render('register', array('error' => $error));
+	}
 	else
 	{
 		$email = $_POST["email"]; $password = $_POST["password"];

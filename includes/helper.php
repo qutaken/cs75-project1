@@ -65,19 +65,30 @@ function prepare_query($dbh, $query_string, $array_values)
 	return $sth;
 }
 
-function valid_password($password)
-{
-	if (strlen($_POST['password']) < 7 ||
-		(!preg_match('/((^[0-9]+[a-z]+)|(^[a-z]+[0-9]+))+[0-9a-z]+$/i', $password)))
-		return false;
-}
 
-function valid_email($email)
+function validate_form($email, $password, $password2, &$error)
 {
-	if (!preg_match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', $email))
+	if (strcmp($password, $password2))
+	{
+		$error = "passwords don't match.";
 		return false;
-}
+	}
+	elseif (preg_match('/^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$/', $email) === 0)
+	{
+		$error = "email is not valid.";
+		return false;
+	}
+	elseif (strlen($password) < 7 || preg_match('/((^[0-9]+[a-z]+)|(^[a-z]+[0-9]+))+[0-9a-z]+$/i', $password) === 0)
+	{
+		$error = "password is not valid.";
+		return false;
+	}
+	else
+	{
+		return true;
+	}
 
+}
 /*
  * This piece of code makes sure the user is logged in before he can access any page
  * and if he isn't it redirects him to the login page.
@@ -99,3 +110,21 @@ if (isset($_GET["page"]))
 
 
 ?>
+
+ 
+[0-9a-z]*
+
+
+
+	if (strcmp($_POST['password'], $_POST['re_password']))
+	{
+		render('register', array('error' => "Passwords don't match."));
+	}
+	else if (!is_valid_email($_POST["email"]))
+	{
+		render('register', array('error' => "Not a valid email."));
+	}
+	else if (!is_valid_password($_POST["password"]))
+	{
+		render('register', array('error' => "Not a valid password."));	
+	}
