@@ -17,6 +17,11 @@ if (isset($_POST["email"]) && isset($_POST["password"]) && isset($_POST["re_pass
 	{
 		render('register', array('error' => "Passwords don't match."));
 	}
+	else if (strlen($_POST['password']) < 7 ||
+			(!preg_match('/((^[0-9]+[a-z]+)|(^[a-z]+[0-9]+))+[0-9a-z]+$/i', $_POST['password']))
+	{
+		render('register', array('error' => "Not a valid password."));	
+	}
 	else
 	{
 		$email = $_POST["email"]; $password = $_POST["password"];
