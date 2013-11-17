@@ -14,14 +14,11 @@ require_once('../includes/helper.php');
 if (isset($_POST["email"]) && isset($_POST["password"]) && isset($_POST["re_password"]))
 {
 	if (strcmp($_POST['password'], $_POST['re_password']))
-	{
 		render('register', array('error' => "Passwords don't match."));
-	}
-	else if (strlen($_POST['password']) < 7 ||
-			(!preg_match('/((^[0-9]+[a-z]+)|(^[a-z]+[0-9]+))+[0-9a-z]+$/i', $_POST['password'])))
-	{
+	else if (valid_password($_POST["password"]))
 		render('register', array('error' => "Not a valid password."));	
-	}
+	else if (valid_email($_POST["email"]))
+		render('register', array('error' => "Not a valid email."));
 	else
 	{
 		$email = $_POST["email"]; $password = $_POST["password"];

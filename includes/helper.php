@@ -65,6 +65,19 @@ function prepare_query($dbh, $query_string, $array_values)
 	return $sth;
 }
 
+function valid_password($password)
+{
+	if (strlen($_POST['password']) < 7 ||
+		(!preg_match('/((^[0-9]+[a-z]+)|(^[a-z]+[0-9]+))+[0-9a-z]+$/i', $password)))
+		return false;
+}
+
+function valid_email($email)
+{
+	if (!preg_match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', $email))
+		return false;
+}
+
 /*
  * This piece of code makes sure the user is logged in before he can access any page
  * and if he isn't it redirects him to the login page.
