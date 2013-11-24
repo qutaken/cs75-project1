@@ -32,12 +32,16 @@ function login_user($email, $password, &$error)
 		return false;
 	}
 	$sth->execute();
-	echo "executed";
 	$result = $sth->fetch(PDO::FETCH_ASSOC);
-	print_r($result);
-	if (isset($result["uid"])) {
+	if (isset($result["uid"]))
+	{
 		$dbh = null;
 		return $result["uid"];
+	}
+	else
+	{
+		$error = "Username or password don't match.";
+		return false;
 	}
 }
 
@@ -115,7 +119,7 @@ function register_user($email, $password, &$error)
 		return false;
 	}
 	$insert_stmt = prepare_query($dbh, "INSERT INTO users (email, password, money) VALUES (:email, :password, 10000)", $values);
-	if (!$select_stmt) 
+	if (!$insert_stmt) 
 	{
 		$error = 'Not valid SQL statement #INSERT';
 		return false;
@@ -137,21 +141,90 @@ function register_user($email, $password, &$error)
 	}
 }
 
-function valid_password($password)
+function get_user_balance($userid, &$error)
 {
-	if (strlen($_POST['password']) < 7 ||
-		(!preg_match('/((^[0-9]+[a-z]+)|(^[a-z]+[0-9]+))+[0-9a-z]+$/i', $password)))
+	$dbh = connect_to_database();
+	if (!$dbh) 
+	{
+		$error = 'could not connect to database';
+		$dbh = null;
 		return false;
+	}
+	$values = array('userid' => $userid);
+	$stmt = prepare_query($dbh, "SELECT money FROM users WHERE uid=:userid", $values);
+	if (!$stmt) 
+	{
+		$error = 'Not valid SQL statement #SELECT';
+		return false;
+	}
+	$stmt->execute();
+	$result = $stmt->fetch(PDO::FETCH_ASSOC);
+	if (isset($result['money']))
+	{
+		$dbh = null;
+		return $result['money'];
+	}
 }
 
-function valid_email($email)
+function buy_shares($userid, $symbol, $shares, &$error)
 {
-	if (!preg_match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', $email))
+	// Here's where ALL the magic happens.
+	$balance = get_user_balance($id, $error);
+	if (!$balance)
+	{
 		return false;
+	}
+	$data = get_quote_data($symbol);
+	if (isset($data['last_trade']))
+	{
+		extract($data);
+		$total = $last_trade * $amount;
+		$balance = get_user_balance($userid ,$error);
+		if ($balance < $total)
+		{
+			$error = 'Sorry not enough money.(we\'re not a credit card company)';
+			return false;
+		}
+		$dbh = connect_to_database();
+		if (!$dbh)
+		{
+			$error = 'Could not connect to database.';
+			return false;
+		}
+		try {
+			$dbh->beginTransaction();
+			$values = array('uid' => $userid, 'total' => $total, 'symbol' => $symbol, 'amount' => $amount);
+			$update_money = prepare_query($dbh, "UPDATE users SET money=:total WHERE uid=:uid", $values);
+			$update_money->execute();
+			$select_stock = prepare_query($dbh, "SELECT symbol FROM portfolio WHERE uid=:uid", $values);
+			$select_stock->execute();
+			if ($select_stock->rowCount() < 1)
+			{
+				$insert_stock = prepare_query($dbh, "INSERT INTO portfolio (uid, symbol, amount) VALUES (:uid, :symbol, :amount)", $values);
+				$insert_stock->execute();
+			}
+			else
+			{
+				$update_stock = prepare_query($dbh, "UPDATE portfolio SET amount=:amount WHERE uid=:uid AND symbol=:symbol", $values);
+				$update_stock->execute();
+			}
+			$dbh->commit();
+			$dbh = null;
+
+		} catch (PDOException $e) {
+			$dbh->rollback();
+			$dbh = null;
+			$error = "problem with queries.";
+			return false;
+		}
+		return true;
+	}
+	else
+	{
+		$error = "Not a valid stock symbol.";
+		return false;
+	}
+		
 }
-
-function get_user_balance($userid) { }
-
-function buy_shares($userid, $symbol, $shares, &$error) { }
 
 function sell_shares($userid, $symbol, &$error) { }

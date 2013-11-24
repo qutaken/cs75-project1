@@ -7,6 +7,7 @@
 	right: 0;
 	left: 0;
 	margin: auto;
+	text-align: center;
 }
 #frame {
 	width: 310px;
@@ -56,4 +57,11 @@ input {
 	width: 15vw;
 	margin-right: auto;
 	margin-left: auto;	
+}
+#table_view {
+	border: 2px solid rgb(129, 129, 129);
+	border-radius: 11px;
+	padding: 5px;
+	margin: auto;
+	margin-top: 15px;
 }

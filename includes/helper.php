@@ -59,7 +59,8 @@ function prepare_query($dbh, $query_string, $array_values)
 	foreach ($array_values as $key => $value) {
 		if (strpos($query_string,':' . $key))
 		{
-			$sth->bindValue(':' . $key, $value);			
+			$sth->bindValue(':' . $key, $value);
+			echo $value;
 		}
 	}
 	return $sth;
@@ -111,20 +112,3 @@ if (isset($_GET["page"]))
 
 ?>
 
- 
-[0-9a-z]*
-
-
-
-	if (strcmp($_POST['password'], $_POST['re_password']))
-	{
-		render('register', array('error' => "Passwords don't match."));
-	}
-	else if (!is_valid_email($_POST["email"]))
-	{
-		render('register', array('error' => "Not a valid email."));
-	}
-	else if (!is_valid_password($_POST["password"]))
-	{
-		render('register', array('error' => "Not a valid password."));	
-	}

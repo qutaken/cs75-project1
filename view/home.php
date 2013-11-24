@@ -4,7 +4,7 @@ render('header', array('title' => 'C$75 Finance'));
 ?>
 
 <ul>
-	<li><a href="quote/GOOG">Get quote for Google</a></li>
+	<li><a href="quote">Get a quote</a></li>
 	<li><a href="portfolio">View Portfolio</a></li>
 	<li><a href="logout">Logout</a></li>
 </ul>
