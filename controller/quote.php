@@ -14,11 +14,16 @@ require_once('../includes/helper.php');
 
 if (isset($_REQUEST['param']))
 {
-	$quote_data = get_quote_data(urlencode($_REQUEST['param']));
-	render('quote', array('quote_data' => $quote_data));
+	$error;
+	$quote_data = get_quote_data(urlencode($_REQUEST['param']), $error);
+	$title = 'Quote for '.htmlspecialchars($quote_data["symbol"]);
+	
+	render('template', array('view' => 'quote', 'title' => $title,
+	 'header' => 'Get Quote', 'data' => $quote_data, 'error' => $error));
 }
 else
 {
-	render('quote');
+	render('template', array('view' => 'quote', 'title' => $title,
+	 'header' => 'Get Quote', 'error' => $error));
 }
 ?>

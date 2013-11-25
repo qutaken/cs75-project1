@@ -27,11 +27,11 @@ if (isset($_POST['email']) &&
 	}
 	else
 	{
-		render('login', array('error' => $error));
+		render('template', array('view' => 'login', 'error' => $error, 'header' => 'Log in'));
 	}
 }
 else
 {
-	render('login', array('error' => 'nothing entered'));
+	render('template', array('view' => 'login', 'header' => 'Log in'));
 }
 ?>

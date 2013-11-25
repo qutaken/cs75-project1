@@ -80,18 +80,25 @@ function get_user_shares($userid)
  *
  * @param string $symbol
  */
-function get_quote_data($symbol)
+function get_quote_data($symbol, &$error)
 {
-	$result = array();
-	$url = "http://download.finance.yahoo.com/d/quotes.csv?s={$symbol}&f=sl1n&e=.csv";
-	$handle = fopen($url, "r");
-	if ($row = fgetcsv($handle))
-		if (isset($row[1]))
-			$result = array("symbol" => $row[0],
-							"last_trade" => $row[1],
-							"name" => $row[2]);
-	fclose($handle);
-	return $result;
+	if(!empty($symbol))
+	{
+		$result = array();
+		$url = "http://download.finance.yahoo.com/d/quotes.csv?s={$symbol}&f=sl1n&e=.csv";
+		$handle = fopen($url, "r");
+		if ($row = fgetcsv($handle))
+			if (isset($row[1]))
+				$result = array("symbol" => $row[0],
+								"last_trade" => $row[1],
+								"name" => $row[2]);
+		fclose($handle);
+		if ($result["last_trade"] == 0.00)
+		{
+			$error = "No valid symbol was provided, or no quote data was found.";
+		}
+		return $result;
+	}
 }
 
 /*
@@ -166,16 +173,16 @@ function get_user_balance($userid, &$error)
 	}
 }
 
-function buy_shares($userid, $symbol, $shares, &$error)
+function buy_shares($userid, $symbol, $amount, &$error)
 {
 	// Here's where ALL the magic happens.
-	$balance = get_user_balance($id, $error);
+	$balance = get_user_balance($userid, $error);
 	if (!$balance)
 	{
 		return false;
 	}
-	$data = get_quote_data($symbol);
-	if (isset($data['last_trade']))
+	$data = get_quote_data($symbol, $error);
+	if (isset($data['last_trade']) && $data['last_trade'] > 0.0)
 	{
 		extract($data);
 		$total = $last_trade * $amount;
@@ -193,19 +200,21 @@ function buy_shares($userid, $symbol, $shares, &$error)
 		}
 		try {
 			$dbh->beginTransaction();
-			$values = array('uid' => $userid, 'total' => $total, 'symbol' => $symbol, 'amount' => $amount);
+			$values = array('uid' => $userid, 'total' => $balance - $total, 'symbol' => $symbol, 'amount' => $amount);
 			$update_money = prepare_query($dbh, "UPDATE users SET money=:total WHERE uid=:uid", $values);
 			$update_money->execute();
-			$select_stock = prepare_query($dbh, "SELECT symbol FROM portfolio WHERE uid=:uid", $values);
+			$select_stock = prepare_query($dbh, "SELECT symbol FROM portfolio WHERE uid=:uid AND symbol=:symbol", $values);
 			$select_stock->execute();
 			if ($select_stock->rowCount() < 1)
 			{
-				$insert_stock = prepare_query($dbh, "INSERT INTO portfolio (uid, symbol, amount) VALUES (:uid, :symbol, :amount)", $values);
+				$insert_stock = prepare_query($dbh, "INSERT INTO portfolio 
+					(uid, symbol, amount) VALUES (:uid, :symbol, :amount)", $values);
 				$insert_stock->execute();
 			}
 			else
 			{
-				$update_stock = prepare_query($dbh, "UPDATE portfolio SET amount=:amount WHERE uid=:uid AND symbol=:symbol", $values);
+				$update_stock = prepare_query($dbh, "UPDATE portfolio 
+					SET amount=amount + :amount WHERE uid=:uid AND symbol=:symbol", $values);
 				$update_stock->execute();
 			}
 			$dbh->commit();

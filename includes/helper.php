@@ -60,7 +60,6 @@ function prepare_query($dbh, $query_string, $array_values)
 		if (strpos($query_string,':' . $key))
 		{
 			$sth->bindValue(':' . $key, $value);
-			echo $value;
 		}
 	}
 	return $sth;

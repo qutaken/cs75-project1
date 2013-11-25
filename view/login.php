@@ -1,38 +1,25 @@
-<?php
-require_once('../includes/helper.php');
-render('header', array('title' => 'C$75 Finance'));
-?>
-<div id="container">
-	<div id="frame">
-		<h2 id="header" style="font-family:sans-serif;">Log in</h2>
-		<form id="form" method="POST" action="login" onsubmit="return validateForm();">
-			<div class="field text">
-		    	<label for="inputEmail">Email</label>
-		      	<input type="text" id="inputEmail" name="email" placeholder="Email">
-		    </div>
-		    <div class="field text">
-		    	<label for="inputPassword">Password</label>
-		      	<input type="password" id="inputPassword" name="password" placeholder="Password">
-			</div>
-			<div class="field text">
-		      	<input type="submit" value="Login">
-	    	</div>
-		</form>
-		<div class="field text" id="register_div">
-	  		<label for="register">Not registered?</label>
-	    	<a href="register/" id="register">Register here</a>
-		</div>
+<form id="form" method="POST" action="login" onsubmit="return validateLoginForm();">
+	<div class="field text">
+    	<label for="inputEmail">Email</label>
+      	<input type="text" id="inputEmail" name="email" placeholder="Email">
+    </div>
+    <div class="field text">
+    	<label for="inputPassword">Password</label>
+      	<input type="password" id="inputPassword" name="password" placeholder="Password">
 	</div>
-	<?php 
-	if (isset($error))
-		echo "<p>{$error}<p/>"; 
-	?>
+	<div class="field text">
+      	<input type="submit" value="Login">
+	</div>
+</form>
+<div class="field text" id="register_div">
+		<label for="register">Not registered?</label>
+	<a href="register/" id="register">Register here</a>
 </div>
 
 <script type='text/javascript'>
 // <! [CDATA[
 
-function validateForm()
+function validateLoginForm()
 {
 	isValid = true;
 	
@@ -49,7 +36,3 @@ $("input[name=email]").focus();
 
 // ]] >
 </script>
-
-<?php
-render('footer');
-?>
