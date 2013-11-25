@@ -51,25 +51,33 @@ function login_user($email, $password, &$error)
  *
  * @param int $userid
  */
-function get_user_shares($userid)
+function get_user_shares($userid, &$error)
 {
 	// connect to database with PDO
-	$dsn = 'mysql:host='.DB_HOST.';dbname='.DB_DATABASE;
-	$dbh = new PDO($dsn, DB_USER, DB_PASSWORD);
-	
-	// get user's portfolio
-	$stmt = $dbh->prepare("SELECT symbol, shares FROM portfolios WHERE userid=:userid");
-	$stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
-	if ($stmt->execute())
+	$dbh = connect_to_database();
+	if ($dbh)
 	{
-	    $result = array();
-	    while ($row = $stmt->fetch()) {
-			array_push($result, $row);
-	    }
-		$dbh = null;
-		return $result;
+		// get user's portfolio
+		$values = array('userid' => $userid);
+		$stmt = prepare_query($dbh, "SELECT symbol, amount FROM portfolio WHERE uid=:userid", $values);
+		if (!$stmt)
+		{
+			$error = "Error preparing statement.";
+			$dbh = null;
+			return false;
+		}
+		if ($stmt->execute())
+		{
+		    $result = array();
+		    while ($row = $stmt->fetch())
+		    {
+				array_push($result, $row);
+		    }
+			$dbh = null;
+			return $result;
+		}
 	}
-	
+	$error = 'Could not execute.';
 	// close database and return null 
 	$dbh = null;
 	return null;
@@ -175,7 +183,7 @@ function get_user_balance($userid, &$error)
 
 function buy_shares($userid, $symbol, $amount, &$error)
 {
-	if (!is_int($amount))
+	if (!(strpos(htmlspecialchars($amount), '.') === false))
 	{
 		$error = 'Not a valid amount of that share.';
 		return false;
