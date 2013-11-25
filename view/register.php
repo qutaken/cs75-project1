@@ -1,33 +1,20 @@
-<?php
-require_once('../includes/helper.php');
-render('header', array('title' => 'C$75 Finance'));
-?>
-<div id="container">
-	<div id="frame">
-		<h2 id="header" style="font-family:sans-serif;">Register</h2>
-		<form id="form" method="POST" action="/register" onsubmit="return validateForm();">
-			<div class="field text">
-		    	<label for="inputEmail">Email</label>
-		      	<input type="text" id="inputEmail" name="email" placeholder="Email">
-		    </div>
-		    <div class="field text">
-		    	<label for="inputPassword">Password</label>
-		      	<input type="password" id="inputPassword" name="password" placeholder="Password">
-			</div>
-			<div class="field text">
-		    	<label for="inputPassword">Retype Password</label>
-		      	<input type="password" id="inputPassword" name="re_password" placeholder="Password">
-			</div>
-			<div class="field text">
-		      	<input type="submit" value="Register">
-	    	</div>
-		</form>
+<form id="form" method="POST" action="/register" onsubmit="return validateForm();">
+	<div class="field text">
+    	<label for="inputEmail">Email</label>
+      	<input type="text" id="inputEmail" name="email" placeholder="Email">
+    </div>
+    <div class="field text">
+    	<label for="inputPassword">Password</label>
+      	<input type="password" id="inputPassword" name="password" placeholder="Password">
 	</div>
-	<?php 
-	if (isset($error))
-		echo "<p>{$error}<p/>"; 
-	?>
-</div>
+	<div class="field text">
+    	<label for="inputPassword">Retype Password</label>
+      	<input type="password" id="inputPassword" name="re_password" placeholder="Password">
+	</div>
+	<div class="field text">
+      	<input type="submit" value="Register">
+	</div>
+</form>
 
 <script type='text/javascript'>
 // <! [CDATA[
@@ -57,7 +44,3 @@ $("input[name=email]").focus();
 
 // ]] >
 </script>
-
-<?php
-render('footer');
-?>

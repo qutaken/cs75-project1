@@ -22,6 +22,6 @@ if (isset($_SESSION['userid']))
 }
 else
 {
-	render('login');
+	render('template', array('view' => 'login', 'title' => 'Login', 'header' => 'Log in'));
 }
 ?>

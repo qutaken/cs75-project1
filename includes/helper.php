@@ -70,17 +70,17 @@ function validate_form($email, $password, $password2, &$error)
 {
 	if (strcmp($password, $password2))
 	{
-		$error = "passwords don't match.";
+		$error = "Passwords don't match.";
 		return false;
 	}
 	elseif (preg_match('/^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$/', $email) === 0)
 	{
-		$error = "email is not valid.";
+		$error = "Email is not valid.";
 		return false;
 	}
 	elseif (strlen($password) < 7 || preg_match('/((^[0-9]+[a-z]+)|(^[a-z]+[0-9]+))+[0-9a-z]+$/i', $password) === 0)
 	{
-		$error = "password is not valid.";
+		$error = "Password is not valid.";
 		return false;
 	}
 	else

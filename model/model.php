@@ -175,6 +175,11 @@ function get_user_balance($userid, &$error)
 
 function buy_shares($userid, $symbol, $amount, &$error)
 {
+	if (!is_int($amount))
+	{
+		$error = 'Not a valid amount of that share.';
+		return false;
+	}
 	// Here's where ALL the magic happens.
 	$balance = get_user_balance($userid, $error);
 	if (!$balance)

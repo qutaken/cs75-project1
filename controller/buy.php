@@ -12,6 +12,7 @@ if (isset($_REQUEST['param']) && isset($_REQUEST['amount']))
 	if (!$return)
 	{
 		render('template', array('view' => 'buy', 'title' => 'Buy', 'header' => 'Buy stock', 'error' => $error));
+		exit();
 	}
 	header("Location: /portfolio");
 

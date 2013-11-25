@@ -16,7 +16,8 @@ if (isset($_POST["email"]) && isset($_POST["password"]) && isset($_POST["re_pass
 {
 	if (!validate_form($_POST['email'], $_POST['password'], $_POST['re_password'], $error))
 	{
-		render('register', array('error' => $error));
+		render('template', array('view' => 'register','title' => 'Register',
+		 'header' => 'Register', 'error' => $error));
 	}
 	else
 	{	
@@ -26,15 +27,16 @@ if (isset($_POST["email"]) && isset($_POST["password"]) && isset($_POST["re_pass
 		$registered = register_user($email, $password, $error);
 		if (!$registered)
 		{
-			render('register', array('error' => $error));
+			render('template', array('view' => 'register','title' => 'Register',
+			 'header' => 'Register', 'error' => $error));
 		}
 		else
 		{
-			render('login');	
+			render('template', array('view' => 'login', 'title' => 'Login', 'header' => 'Log in'));	
 		}
 	}
 }
 else
 {
-	render('register');
+	render('template', array('view' => 'register', 'title' => 'Register', 'header' => 'Register'));
 }
