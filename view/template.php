@@ -8,7 +8,12 @@
 	 */
 	
 	require_once('../includes/helper.php');
-	render('header', array('title' => isset($title) ? $title : 'C$75 Finance'));
+	if (!strcmp($view, 'home'))
+	{
+		
+	}
+	render('header', array('title' => isset($title) ? $title : 'C$75 Finance',
+	 'home_link' => strcmp($view, 'home') ? true : false));
 	
 	echo "	<div id='container'>
 			<div id='frame'>

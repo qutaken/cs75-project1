@@ -38,7 +38,6 @@ if (isset($_SESSION['userid']))
 		$amount = $current_prices[$stock['symbol']];
 		$current_prices[$stock['symbol']] = array($stock['last_trade'], $stock['last_trade'] * $amount);
 		$total += $current_prices[$stock['symbol']][1];
-		echo "<pre>"; print_r($current_prices); echo "</pre>";
 	}
 	// send all the data to the template
 	render('template', array('view' => 'portfolio', 'title' => 'Portfolio', 'header' => 'Portfolio', 

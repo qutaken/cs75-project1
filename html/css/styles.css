@@ -73,7 +73,21 @@ input {
 #symbol {
 	margin: 5px;
 }
-td, th {
+td, th, ul {
 	text-align: center;
 	padding: 5px;
+}
+li {
+	display: inline-block;
+}
+.list_item {
+	display: inline-block;
+	background-color: rgba(202, 202, 202, 0.85);
+	text-align: left;
+	text-decoration: none;
+	padding: 5px;
+	border-radius: 5px;
+	box-shadow: 0px 0px 5px 0px #88887A;
+	color: rgb(31, 31, 31);
+	font-family: sans-serif;
 }
