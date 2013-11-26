@@ -1,6 +1,5 @@
 #container {
-	width: 450px;
-	height: 350px;
+	width: 50vw;
 	position: absolute;
 	top: 0;
 	bottom: 0;
@@ -8,10 +7,10 @@
 	left: 0;
 	margin: auto;
 	text-align: center;
+	display: inline-block;
+	padding-top: 15vh;
 }
 #frame {
-	width: 310px;
-	height: 270px;
 	background-color: lightgrey;
 	position: relative;
 	top: 0;
@@ -22,6 +21,8 @@
 	border: 2px solid grey;
 	border-radius: 20px;
 	box-shadow: 10px 10px 7px #888888;
+	display: inline-block;
+	padding: 15px;
 }
 #form {
 	position: relative;
@@ -51,7 +52,7 @@
 	font-size: 15px;
 }
 input {
-	margin: 0px;
+	margin: 5px;
 }
 #register_div {
 	width: 15vw;
@@ -70,6 +71,9 @@ input {
 	width: 50px;
 }
 #symbol {
-	margin: 3px;
-	width: 90px;
+	margin: 5px;
+}
+td, th {
+	text-align: center;
+	padding: 5px;
 }

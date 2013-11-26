@@ -18,8 +18,32 @@ if (isset($_SESSION['userid']))
 	$userid = (int)$_SESSION['userid'];
 	$holdings = get_user_shares($userid, $error);
 	$balance = get_user_balance($userid, $error);
+
+	$current_prices = array();
+	// Initialize the string for the URL for Yahoo Finance
+	// and get the amount of each share from the Database.
+	$symbols = '';
+	foreach ($holdings as $value)
+	{
+		$symbols .= $value["symbol"] . '+';
+		$current_prices[$value['symbol']] = $value['amount'];;
+	}
+
+	$symbols = get_quote_data(urlencode($symbols), $error);
+	// get the current price of each stock in portfolio
+	// and total value of the amount of each stock in portfolio
+	$total = 0;
+	foreach ($symbols as $stock)
+	{
+		$amount = $current_prices[$stock['symbol']];
+		$current_prices[$stock['symbol']] = array($stock['last_trade'], $stock['last_trade'] * $amount);
+		$total += $current_prices[$stock['symbol']][1];
+		echo "<pre>"; print_r($current_prices); echo "</pre>";
+	}
+	// send all the data to the template
 	render('template', array('view' => 'portfolio', 'title' => 'Portfolio', 'header' => 'Portfolio', 
-		'data' => array('holdings' => $holdings, 'balance' => $balance), 'error' => $error));
+		'data' => array('holdings' => $holdings, 'balance' => $balance, 'prices' => $current_prices, 'total' => $total), 
+		'error' => $error));
 }
 else
 {

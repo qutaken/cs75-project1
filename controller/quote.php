@@ -16,6 +16,14 @@ if (isset($_REQUEST['param']))
 {
 	$error;
 	$quote_data = get_quote_data(urlencode($_REQUEST['param']), $error);
+	if (!$quote_data)
+	{
+		render('template', array('view' => 'quote', 
+	 'header' => 'Get Quote', 'error' => $error));
+		exit();
+	}
+	// extract array from inner array
+	$quote_data = $quote_data[0];
 	$title = 'Quote for '.htmlspecialchars($quote_data["symbol"]);
 	
 	render('template', array('view' => 'quote', 'title' => $title,
@@ -23,7 +31,7 @@ if (isset($_REQUEST['param']))
 }
 else
 {
-	render('template', array('view' => 'quote', 'title' => $title,
+	render('template', array('view' => 'quote', 
 	 'header' => 'Get Quote', 'error' => $error));
 }
 ?>

@@ -85,7 +85,11 @@ function get_user_shares($userid, &$error)
 
 /*
  * get_quote_data() - Get Yahoo quote data for a symbol
- *
+ * 
+ * this function doubles down to work two ways for quote page it can be sent one 
+ * stock and for portfolio it takes multiple stocks so not all parts of the function
+ * are for both cases.
+ * 
  * @param string $symbol
  */
 function get_quote_data($symbol, &$error)
@@ -95,15 +99,22 @@ function get_quote_data($symbol, &$error)
 		$result = array();
 		$url = "http://download.finance.yahoo.com/d/quotes.csv?s={$symbol}&f=sl1n&e=.csv";
 		$handle = fopen($url, "r");
-		if ($row = fgetcsv($handle))
+		$result = array();
+		while ($row = fgetcsv($handle))
+		{
 			if (isset($row[1]))
-				$result = array("symbol" => $row[0],
+			{
+				array_push($result, array("symbol" => $row[0],
 								"last_trade" => $row[1],
-								"name" => $row[2]);
+								"name" => $row[2]));
+			}
+		}
 		fclose($handle);
-		if ($result["last_trade"] == 0.00)
+		// this will only work when getting a single quote.
+		if ($result[0]["last_trade"] <= 0.00)
 		{
 			$error = "No valid symbol was provided, or no quote data was found.";
+			return false;
 		}
 		return $result;
 	}
