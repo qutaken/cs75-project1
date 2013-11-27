@@ -73,6 +73,12 @@ function get_user_shares($userid, &$error)
 		    {
 				array_push($result, $row);
 		    }
+		    if (!count($result))
+		    {
+		    	$error = 'No shares available.';
+		    	$dbh = null;
+		    	return false;
+		    }
 			$dbh = null;
 			return $result;
 		}
@@ -117,6 +123,11 @@ function get_quote_data($symbol, &$error)
 			return false;
 		}
 		return $result;
+	}
+	else
+	{
+		$error = 'No symbol given.';
+		return false;
 	}
 }
 
@@ -206,9 +217,15 @@ function buy_shares($userid, $symbol, $amount, &$error)
 		return false;
 	}
 	$data = get_quote_data($symbol, $error);
-	if (isset($data['last_trade']) && $data['last_trade'] > 0.0)
+	echo $data;
+	if (!$data)
 	{
-		extract($data);
+		$error = 'Could not get symbol price.';
+		return false;
+	}
+	if (isset($data[0]['last_trade']) && $data[0]['last_trade'] > 0.0)
+	{
+		extract($data[0]);
 		$total = $last_trade * $amount;
 		$balance = get_user_balance($userid ,$error);
 		if ($balance < $total)
@@ -260,4 +277,49 @@ function buy_shares($userid, $symbol, $amount, &$error)
 		
 }
 
-function sell_shares($userid, $symbol, &$error) { }
+function sell_shares($userid, $symbol, &$error)
+{
+	// get the current value
+	$price = get_quote_data($symbol, $error);
+	$price = $price[0]['last_trade'];
+
+	// affect the database as needed
+	$dbh = connect_to_database();
+	if (!$dbh)
+	{
+		$error = 'Error connecting to Database.';
+		return false;
+	}
+	$values = array('uid' => $userid, 'symbol' => $symbol);
+	$stmt = prepare_query($dbh, "SELECT amount FROM portfolio WHERE uid=:uid AND symbol=:symbol", $values);
+	if (!$stmt->execute())
+	{
+		$error = 'Error getting data from Database.';
+		$dbh = null;
+		return false;
+	}
+
+	$result = $stmt->fetch(PDO::FETCH_ASSOC);
+	$values['total'] = $result['amount'] * $price;
+
+	$dbh->beginTransaction();
+	$stmt = prepare_query($dbh, "DELETE FROM portfolio WHERE uid=:uid AND symbol=:symbol", $values);
+	if (!$stmt->execute())
+	{
+		$error = 'Error getting data from Database.';
+		$dbh->rollback();
+		$dbh = null;
+		return false;
+	}
+	$stmt = prepare_query($dbh, "UPDATE users SET money=money+:total WHERE uid=:uid", $values);
+	if (!$stmt->execute())
+	{
+		$error = 'Error getting data from Database.';
+		$dbh->rollback();
+		$dbh = null;
+		return false;
+	}	
+	$dbh->commit();
+	$dbh = null;
+	return true;
+}

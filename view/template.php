@@ -8,10 +8,7 @@
 	 */
 	
 	require_once('../includes/helper.php');
-	if (!strcmp($view, 'home'))
-	{
-		
-	}
+	
 	render('header', array('title' => isset($title) ? $title : 'C$75 Finance',
 	 'home_link' => strcmp($view, 'home') ? true : false));
 	

@@ -18,7 +18,13 @@ if (isset($_SESSION['userid']))
 	$userid = (int)$_SESSION['userid'];
 	$holdings = get_user_shares($userid, $error);
 	$balance = get_user_balance($userid, $error);
-
+	if (!($holdings))
+	{
+		render('template', array('view' => 'portfolio', 'title' => 'Portfolio', 
+			'header' => 'Portfolio', 'balance' => $balance, 'error' => $error));
+		exit();
+	}
+	
 	$current_prices = array();
 	// Initialize the string for the URL for Yahoo Finance
 	// and get the amount of each share from the Database.
@@ -28,7 +34,6 @@ if (isset($_SESSION['userid']))
 		$symbols .= $value["symbol"] . '+';
 		$current_prices[$value['symbol']] = $value['amount'];;
 	}
-
 	$symbols = get_quote_data(urlencode($symbols), $error);
 	// get the current price of each stock in portfolio
 	// and total value of the amount of each stock in portfolio
