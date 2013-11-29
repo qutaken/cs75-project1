@@ -6,7 +6,6 @@ require_once('../includes/helper.php');
 if (isset($_REQUEST['param']) && isset($_REQUEST['amount']))
 {
 	$symbol = strtoupper($_REQUEST['param']);
-	echo $symbol;
 	$amount = $_REQUEST['amount'];
 	$userid = $_SESSION['userid'];
 	$return = buy_shares($userid, $symbol, $amount, $error);

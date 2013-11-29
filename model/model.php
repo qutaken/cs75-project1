@@ -116,12 +116,16 @@ function get_quote_data($symbol, &$error)
 			}
 		}
 		fclose($handle);
-		// this will only work when getting a single quote.
-		if ($result[0]["last_trade"] <= 0.00)
+
+		foreach ($result as $stock)
 		{
-			$error = "No valid symbol was provided, or no quote data was found.";
-			return false;
+			if (!isset($stock['last_trade']) || $stock['last_trade'] <= 0.0000)
+			{
+				$error = "No valid symbol was provided, or no quote data was found.";
+				return false;				
+			}
 		}
+
 		return $result;
 	}
 	else
@@ -217,63 +221,53 @@ function buy_shares($userid, $symbol, $amount, &$error)
 		return false;
 	}
 	$data = get_quote_data($symbol, $error);
-	echo $data;
 	if (!$data)
 	{
-		$error = 'Could not get symbol price.';
 		return false;
 	}
-	if (isset($data[0]['last_trade']) && $data[0]['last_trade'] > 0.0)
+	extract($data[0]);
+	$total = $last_trade * $amount;
+	$balance = get_user_balance($userid ,$error);
+	if ($balance < $total)
 	{
-		extract($data[0]);
-		$total = $last_trade * $amount;
-		$balance = get_user_balance($userid ,$error);
-		if ($balance < $total)
+		$error = 'Sorry not enough money.(we\'re not a credit card company)';
+		return false;
+	}
+	$dbh = connect_to_database();
+	if (!$dbh)
+	{
+		$error = 'Could not connect to database.';
+		return false;
+	}
+	try {
+		$dbh->beginTransaction();
+		$values = array('uid' => $userid, 'total' => $balance - $total, 'symbol' => $symbol, 'amount' => $amount);
+		$update_money = prepare_query($dbh, "UPDATE users SET money=:total WHERE uid=:uid", $values);
+		$update_money->execute();
+		$select_stock = prepare_query($dbh, "SELECT symbol FROM portfolio WHERE uid=:uid AND symbol=:symbol", $values);
+		$select_stock->execute();
+		if ($select_stock->rowCount() < 1)
 		{
-			$error = 'Sorry not enough money.(we\'re not a credit card company)';
-			return false;
+			$insert_stock = prepare_query($dbh, "INSERT INTO portfolio 
+				(uid, symbol, amount) VALUES (:uid, :symbol, :amount)", $values);
+			$insert_stock->execute();
 		}
-		$dbh = connect_to_database();
-		if (!$dbh)
+		else
 		{
-			$error = 'Could not connect to database.';
-			return false;
+			$update_stock = prepare_query($dbh, "UPDATE portfolio 
+				SET amount=amount + :amount WHERE uid=:uid AND symbol=:symbol", $values);
+			$update_stock->execute();
 		}
-		try {
-			$dbh->beginTransaction();
-			$values = array('uid' => $userid, 'total' => $balance - $total, 'symbol' => $symbol, 'amount' => $amount);
-			$update_money = prepare_query($dbh, "UPDATE users SET money=:total WHERE uid=:uid", $values);
-			$update_money->execute();
-			$select_stock = prepare_query($dbh, "SELECT symbol FROM portfolio WHERE uid=:uid AND symbol=:symbol", $values);
-			$select_stock->execute();
-			if ($select_stock->rowCount() < 1)
-			{
-				$insert_stock = prepare_query($dbh, "INSERT INTO portfolio 
-					(uid, symbol, amount) VALUES (:uid, :symbol, :amount)", $values);
-				$insert_stock->execute();
-			}
-			else
-			{
-				$update_stock = prepare_query($dbh, "UPDATE portfolio 
-					SET amount=amount + :amount WHERE uid=:uid AND symbol=:symbol", $values);
-				$update_stock->execute();
-			}
-			$dbh->commit();
-			$dbh = null;
+		$dbh->commit();
+		$dbh = null;
 
-		} catch (PDOException $e) {
-			$dbh->rollback();
-			$dbh = null;
-			$error = "problem with queries.";
-			return false;
-		}
-		return true;
-	}
-	else
-	{
-		$error = "Not a valid stock symbol.";
+	} catch (PDOException $e) {
+		$dbh->rollback();
+		$dbh = null;
+		$error = "problem with queries.";
 		return false;
 	}
+	return true;
 		
 }
 

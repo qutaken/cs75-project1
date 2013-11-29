@@ -29,9 +29,9 @@ function validateForm()
 	re_password = $("input[name=re_password]");
 	if (emailField.val().length < 6)
 		isValid = false;
-	else if (password.length() < 7 || !password.match(/((^[0-9]+[a-z]+)|(^[a-z]+[0-9]+))+[0-9a-z]+$/i))
+	else if (password.val().length() < 7 || !password.val().match(/((^[0-9]+[a-z]+)|(^[a-z]+[0-9]+))+[0-9a-z]+$/i))
 		isValid = false;
-	else if (!emailField.match(/^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$/i))
+	else if (!emailField.val().match(/^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$/i))
 		isValid = false;
 	else if (password.localeCompare(re_password))
 		isValid = false;

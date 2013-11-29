@@ -1,4 +1,4 @@
-            <form action="quote" method="POST">
+            <form action="quote" method="POST" onsubmit="return validateQuoteForm();">
                 <div class="field text">
                     <label for="quote">Symbol</label>
                     <input type="text" name="param" placeholder="Stock Symbol" id="symbol">
@@ -28,6 +28,20 @@ if (isset($data["symbol"]) && $data["last_trade"] > 0.0)
 
 <script type='text/javascript'>
 // <! [[CDATA
+
+// check if the symbol is alphabetic
+function validateQuoteForm()
+{
+    isValid = true;
+    
+    symbolField = $("#symbol");
+    if (!symbolField.val().match(/^([a-zA-Z]+)$/))
+        isValid = false;
+        alert("Stock can only be Alphabetic.");       
+    return isValid;
+}
+
+
 // set the focus to the email field (located by id attribute)
 $("input[name=param]").focus();
 
