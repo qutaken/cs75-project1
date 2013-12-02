@@ -7,29 +7,28 @@
     </tr>
 <?php
 setlocale(LC_MONETARY, 'en_US.UTF-8');
-$prices = isset($data['prices']) ? $data['prices'] : null;
-if (isset($data['holdings']))
+//$prices = isset($data['prices']) ? $data['prices'] : null;
+if (isset($data))
 {
-	foreach ($data['holdings'] as $holding)
+	$total = array_pop($data);
+	foreach ($data as $row)
 	{
 	    print "<tr>";
-	    print "<td>" . htmlspecialchars($holding["symbol"]) . "</td>";
-	    print "<td>" . htmlspecialchars($holding["amount"]) . "</td>";
-	    print "<td>" . htmlspecialchars(money_format('%i', $prices[$holding['symbol']][0])) . "</td>";
-	    print "<td>" . htmlspecialchars(money_format('%i', $prices[$holding['symbol']][1])) . "</td>";
-	    print "<td><a href=\"/sell/{$holding['symbol']}\" class='list_item'>Sell</a></td>";
+	    print "<td>" . htmlspecialchars($row["symbol"]) . "</td>";
+	    print "<td>" . htmlspecialchars($row["amount"]) . "</td>";
+	    print "<td>" . htmlspecialchars(money_format('%i', $row['price'])) . "</td>";
+	    print "<td>" . htmlspecialchars(money_format('%i', $row['total'])) . "</td>";
+	    print "<td><a href='/sell/" . $row['symbol'] . "' class='list_item'>Sell</a></td>";
 	    print "</tr>";
 	}
+	echo	"<table id='table_view'>
+			<th>Total: </th>
+			<td>" . htmlspecialchars(money_format('%i', $total)) . "</td>
+		</table>
+
+		<table id='table_view'>
+			<th>Balance: </th>
+			<td>" . htmlspecialchars(money_format('%i', $data[0]['money'])) . "</td>
+		</table>
+	</table>";
 }
-?>
-<?php if (isset($data['total'])): ?>
-	<table id="table_view">
-		<th>Total: </th>
-		<td><?= htmlspecialchars(money_format('%i', $data['total'])) ?></td>
-	</table>
-<?php endif; ?>
-	<table id="table_view">
-		<th>Balance: </th>
-		<td><?= htmlspecialchars(money_format('%i', $data['balance'])) ?></td>
-	</table>
-</table>

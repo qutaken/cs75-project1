@@ -15,7 +15,6 @@ if (isset($_REQUEST['param']) && isset($_REQUEST['amount']))
 		exit();
 	}
 	header("Location: /portfolio");
-
 }
 else
 {

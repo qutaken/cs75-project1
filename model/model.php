@@ -24,15 +24,15 @@ function login_user($email, $password, &$error)
 		return false;
 	}
 	$values = array("email" => $email, "password" => hash("SHA1",$password));
-	$sth = prepare_query($dbh, "SELECT uid FROM users WHERE LOWER(email)=:email AND password=:password",$values);
-	if(!$sth)
+	$stmt = prepare_query($dbh, "SELECT uid FROM users WHERE LOWER(email)=:email AND password=:password",$values);
+	if(!$stmt)
 	{
 		$dbh = null;
 		$error = "Incorrect SQL statement.";
 		return false;
 	}
-	$sth->execute();
-	$result = $sth->fetch(PDO::FETCH_ASSOC);
+	$stmt->execute();
+	$result = $stmt->fetch(PDO::FETCH_ASSOC);
 	if (isset($result["uid"]))
 	{
 		$dbh = null;
@@ -102,9 +102,19 @@ function get_quote_data($symbol, &$error)
 {
 	if(!empty($symbol))
 	{
+		if (!preg_match('/^([.A-Za-z])+((\+[.A-Za-z]+)*\+?)$/', $symbol))
+		{
+			$error = 'Invalid symbol.';
+			return false;
+		}
 		$result = array();
-		$url = "http://download.finance.yahoo.com/d/quotes.csv?s={$symbol}&f=sl1n&e=.csv";
+		$url = "http://download.finance.yahoo.com/d/quotes.csv?s=" . trim($symbol) . "&f=sl1n&e=.csv";
 		$handle = fopen($url, "r");
+		if (!$handle)
+		{
+			$error = 'Not a valid URL.';
+			return false;
+		}
 		$result = array();
 		while ($row = fgetcsv($handle))
 		{
@@ -127,11 +137,6 @@ function get_quote_data($symbol, &$error)
 		}
 
 		return $result;
-	}
-	else
-	{
-		$error = 'No symbol given.';
-		return false;
 	}
 }
 
@@ -209,7 +214,7 @@ function get_user_balance($userid, &$error)
 
 function buy_shares($userid, $symbol, $amount, &$error)
 {
-	if (!(strpos(htmlspecialchars($amount), '.') === false))
+	if (!(strpos(htmlspecialchars($amount), '.') === false) || $amount < 1)
 	{
 		$error = 'Not a valid amount of that share.';
 		return false;
@@ -225,14 +230,15 @@ function buy_shares($userid, $symbol, $amount, &$error)
 	{
 		return false;
 	}
+
 	extract($data[0]);
 	$total = $last_trade * $amount;
-	$balance = get_user_balance($userid ,$error);
 	if ($balance < $total)
 	{
 		$error = 'Sorry not enough money.(we\'re not a credit card company)';
 		return false;
 	}
+	
 	$dbh = connect_to_database();
 	if (!$dbh)
 	{
@@ -316,4 +322,72 @@ function sell_shares($userid, $symbol, &$error)
 	$dbh->commit();
 	$dbh = null;
 	return true;
+}
+
+/*
+ * get_user_portfolio()
+ * 
+ * Gets all the data -efficiently- needed for the portfolio controller
+ * 
+ */
+function get_user_portfolio($uid, &$error)
+{
+	$dbh = connect_to_database();
+	if (!$dbh)
+	{
+		return false;
+	}
+	$values = array('uid' => $uid);
+	$stmt = prepare_query($dbh, "SELECT users.money, portfolio.symbol, portfolio.amount
+								 FROM users
+								 JOIN portfolio ON users.uid=:uid AND portfolio.uid=users.uid
+								 ", $values);
+	if (!$stmt)
+	{
+		echo 'error preparing statement.';
+		$dbh = null;
+		return false;
+	}
+	if (!$stmt->execute())
+	{
+		echo 'error getting data from Database.';
+		$dbh = null;
+		return false;
+	}
+	$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+	$url = '';
+	$current_prices = array();
+	foreach ($data as $row)
+	{
+		$url .= $row["symbol"] . '+';
+		$current_prices[$row['symbol']] = $row['amount'];
+	}
+	$symbols = get_quote_data($url, $error);
+	if (!$symbols)
+		{ return false; }
+
+	$total = 0;
+
+	$i = 0;
+	while (isset($data[$i]))
+	{
+		$stock = $symbols[$i];
+		$row = &$data[$i];
+		if ($row['symbol'] === $stock['symbol'])
+		{
+			$row['price'] = $stock['last_trade'];
+			$row['total'] = $stock['last_trade'] * $row['amount'];
+			$total += $row['total'];
+		}
+		else
+		{
+			echo 'Something went wrong.' . $row['symbol'] . $stock['symbol'];
+			return false;
+		}
+		$i++;
+	}
+
+	$data[] = $total;
+	return $data;
 }

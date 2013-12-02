@@ -19,18 +19,22 @@ function validateBuyForm()
 	// check if the symbol is alphabetic and the amount is numeric
 	symbolField = $("input[name=param]");
 	amountField = $("input[name=amount]");
-	if (!symbolField.val().match(/^([a-zA-Z]+)$/))
+	if (!symbolField.val().match(/^([.a-zA-Z]+)$/))
+	{
 		alert("Symbol can only be Alphabetic.");
 		isValid = false;
-	else if (!amountField.val().match(/^([0-9]+)$/))
-		alert("Amount can only be numeric.");
+	}
+	elseif (!amountField.val().match(/^([0-9]+)$/) || amountField.val() < 0)
+	{
+		alert("Amount can only be positive integers.");
 		isValid = false;
+	}
 		
 	return isValid;
 }
 
 // set the focus to the email field (located by id attribute)
-$("input[name=email]").focus();
+$("input[name=param]").focus();
 
 // ]] >
 </script>

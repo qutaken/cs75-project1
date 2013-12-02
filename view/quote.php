@@ -35,9 +35,11 @@ function validateQuoteForm()
     isValid = true;
     
     symbolField = $("#symbol");
-    if (!symbolField.val().match(/^([a-zA-Z]+)$/))
-        isValid = false;
+    if (!symbolField.val().match(/^([.a-zA-Z]+)$/))
+    {
         alert("Stock can only be Alphabetic.");       
+        isValid = false;
+    }
     return isValid;
 }
 

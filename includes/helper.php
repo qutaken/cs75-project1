@@ -53,16 +53,16 @@ function connect_to_database()
 function prepare_query($dbh, $query_string, $array_values)
 {
 	// prepare the string for database query.
-	$sth = $dbh->prepare($query_string);
-	if (!$sth)
+	$stmt = $dbh->prepare($query_string);
+	if (!$stmt)
 		return false;
 	foreach ($array_values as $key => $value) {
 		if (strpos($query_string,':' . $key))
 		{
-			$sth->bindValue(':' . $key, $value);
+			$stmt->bindValue(':' . $key, $value);
 		}
 	}
-	return $sth;
+	return $stmt;
 }
 
 
